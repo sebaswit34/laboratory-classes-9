@@ -1,21 +1,57 @@
-const express = require("express");
-// const cors = require("cors");
-const dotenv = require("dotenv");
-
-const bookRoutes = require("./routes/bookRoutes");
-const authorRoutes = require("./routes/authorRoutes");
-
-dotenv.config();
-
-const PORT = process.env.PORT || 3001;
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
-// app.use();
+
+// Middleware
+app.use(cors());
 app.use(express.json());
 
-app.use("/api/books", bookRoutes);
-app.use("/api/authors", authorRoutes);
+// Połączenie z MongoDB Atlas
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+.then(() => {
+    console.log('Połączono z MongoDB Atlas');
+})
+.catch(err => {
+    console.error('Błąd połączenia z MongoDB Atlas:', err);
+    process.exit(1);
+});
 
+// Główny endpoint
+app.get('/', (req, res) => {
+    res.json({
+        message: 'API Biblioteki',
+        endpoints: {
+            books: {
+                GET: '/api/books - lista wszystkich książek',
+                POST: '/api/books - dodanie nowej książki',
+                DELETE: '/api/books/:id - usunięcie książki'
+            },
+            authors: {
+                GET: '/api/authors - lista wszystkich autorów',
+                POST: '/api/authors - dodanie nowego autora',
+                PUT: '/api/authors/:id - aktualizacja autora'
+            }
+        }
+    });
+});
+
+// Trasy
+app.use('/api/books', require('./routes/bookRoutes'));
+app.use('/api/authors', require('./routes/authorRoutes'));
+
+// Obsługa błędów
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ message: 'Wystąpił błąd serwera', error: err.message });
+});
+
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`Serwer działa na porcie ${PORT}`);
 });
