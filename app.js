@@ -22,7 +22,7 @@ mongoose.connect(process.env.MONGO_URI, {
     process.exit(1);
 });
 
-// Główny endpoint
+//główny endpoint
 app.get('/', (req, res) => {
     res.json({
         message: 'API Biblioteki',
@@ -41,11 +41,11 @@ app.get('/', (req, res) => {
     });
 });
 
-// Trasy
+
 app.use('/api/books', require('./routes/bookRoutes'));
 app.use('/api/authors', require('./routes/authorRoutes'));
 
-// Obsługa błędów
+
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ message: 'Wystąpił błąd serwera', error: err.message });
